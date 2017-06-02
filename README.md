@@ -1,2 +1,2 @@
 # pea-bee
-Non-programing Database Application Platform
+Non-programing Database Application Platform (Extension of Codeigniter).
