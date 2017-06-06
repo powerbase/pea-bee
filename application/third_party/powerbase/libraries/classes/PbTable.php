@@ -237,7 +237,7 @@ class PbTable extends PB_Model {
 	}
 	
 	public function count() {
-		return $this->getNumOfRows($this->tableName);
+		return $this->getNumOfRows();
 	}
 
 	public function tableExists($table) {

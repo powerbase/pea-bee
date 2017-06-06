@@ -8,6 +8,11 @@ class PbUsersModel extends PbTable {
 		parent::__construct(PbUsersModel::TABLE_NAME);
 	}
 	
+	public function save(array $data, $id=null) {
+		if (isset($data["password"]) && $data["password"] == "") unset($data["password"]);
+		parent::save($data, $id);
+	}
+	
 	public function createTable() {
 		$forge = new PbDbForge($this);
 		$fields = array(
