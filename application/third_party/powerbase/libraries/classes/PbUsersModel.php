@@ -9,8 +9,12 @@ class PbUsersModel extends PbTable {
 	}
 	
 	public function save(array $data, $id=null) {
-		if (isset($data["password"]) && $data["password"] == "") unset($data["password"]);
-		parent::save($data, $id);
+		if (isset($data["password"])) {
+			if ($data["password"] == "") unset($data["password"]);
+			else $data["password"] = PbPassword::hash($data["password"]);
+		} 
+		if (($error = $this->check($data)) !== true) return $error;   
+		return parent::save($data, $id);
 	}
 	
 	public function createTable() {

@@ -19,6 +19,7 @@
 				success: function(html) {
 					$('#outer-user-list').html(html);
 					$(userList).DataTable({
+						paging: false,
 						colReorder: true,
 						dom: 'Zlfrtip',
 						"colResize": {
@@ -32,7 +33,7 @@
 						}
 					});
 					$('.pb-user-row').on('click', function(){
-						var id = $(this).attr('id').match(/\d/g).join();
+						var id = $(this).attr('id').match(/\d/g).join('');
 						self.get(id);
 					});
 					if (colWidth) {
@@ -64,19 +65,31 @@
 		};
 		
 		this.save = function() {
+			var self = this;
 			var data = $('#userData form').serialize();
 			request({
 				url: endPoint + 'users/save/',
 				type: 'POST',
 				data: data,
 				success: function() {
+					self.getList();
+					self.get();
 				}
 			});
 			
 		};
 		
 		this.delete = function(id) {
-			alert(id);
+			var self = this;
+			request({
+				url: endPoint + 'users/delete/?id=' + id,
+				type: 'GET',
+				success: function() {
+					self.getList();
+					self.get();
+				}
+			});
+			
 		};
 	};
 	

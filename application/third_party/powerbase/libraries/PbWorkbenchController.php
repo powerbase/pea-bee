@@ -38,7 +38,19 @@ class PbWorkbenchController extends PB_Controller {
 			case "save":
 				$data = $this->input->post("data");
 				$model = new PbUsersModel();
-				$model->save($data["pb_users"]);
+				$res = $model->save($data["pb_users"]);
+				if (is_array($res)) {
+					
+				}
+				break;
+				
+			case "delete":
+				$id = (int)$this->input->get("id");
+				$model = new PbUsersModel();
+				$user = $model->getById($id);
+				if (is_empty($user)) exit;
+				if ($user["group_id"] == -1) throw new PbException("invalid request.");
+				$model->delete($id);
 				break;
 			default:
 				break;

@@ -186,7 +186,22 @@ class PbTable extends PB_Model {
 	}
 	
 	public function check(array $data) {
-		return true;
+		$errors = array();
+		foreach($data as $name=>$val) {
+			$fields = $this->fields[$name];
+			$type = $fields["type"];
+			$max_length = $fields["max_length"];
+			if ($type == self::DB_FIELD_TYPE_STRING) {
+				if (!empty($max_length)) {
+					//TODO: implements
+				}
+			} else {
+				//TODO: implements
+			}
+		}
+		
+		if (count($errors) == 0) return true;
+		return $errors;
 	}
 
 	public function save(array $data, $id=null) {

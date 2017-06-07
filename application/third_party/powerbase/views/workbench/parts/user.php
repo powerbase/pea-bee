@@ -26,7 +26,7 @@ $lang = new PbTextPerLang();
 			<label class="control-label col-xs-1">User ID</label>
 			<div class="col-xs-2">
 				<input type="text" name="data[pb_users][user_id]" class="form-control" 
-					   value="<?= h($view->value("data[pb_users][user_id]"))?>" readonly>
+					   value="<?= h($view->value("data[pb_users][user_id]"))?>"<?= ($id?" readonly":"")?>>
 			</div>
 		</div>
 		<div class="form-group">
@@ -47,7 +47,8 @@ $lang = new PbTextPerLang();
 			<div class="col-xs-offset-1 col-xs-10">
 				<div class="checkbox">
 					<label>
-						<input type="checkbox"<?=(h($view->value("data[pb_users][admin]"))=="1"?" checked":"")?>
+						<input type="hidden" name="data[pb_users][admin]" value="0" />
+						<input name="data[pb_users][admin]" value="1" type="checkbox"<?=(h($view->value("data[pb_users][admin]"))=="1"?" checked":"")?>
 							<?=(h($view->value("data[pb_users][group_id]"))==-1?" disabled":"")?>>Administrator
 					</label>
 				</div>
