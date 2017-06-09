@@ -18,7 +18,7 @@ $lang = new PbTextPerLang();
 </div>
 
 <div class="container">
-	<form class="form-horizontal">
+	<?= form_open("", array("id"=>"userDataForm", "class" => "form-horizontal",)) ?>
 		<div class="form-group">
 			<input type="hidden" name="data[pb_users][id]" value="<?= h($id)?>">
 		</div>
@@ -26,14 +26,14 @@ $lang = new PbTextPerLang();
 			<label class="control-label col-xs-1">User ID</label>
 			<div class="col-xs-2">
 				<input type="text" name="data[pb_users][user_id]" class="form-control" 
-					   value="<?= h($view->value("data[pb_users][user_id]"))?>"<?= ($id?" readonly":"")?>>
+					   value="<?= h($view->value("data[pb_users][user_id]"))?>"<?= ($id?" readonly":"")?> required>
 			</div>
 		</div>
 		<div class="form-group">
 			<label class="control-label col-xs-1">Name</label>
 			<div class="col-xs-4">
 				<input type="text" name="data[pb_users][user_name]" 
-					   value="<?= h($view->value("data[pb_users][user_name]"))?>" class="form-control">
+					   value="<?= h($view->value("data[pb_users][user_name]"))?>" class="form-control" required>
 			</div>
 		</div>
 		<div class="form-group">
@@ -54,7 +54,7 @@ $lang = new PbTextPerLang();
 				</div>
 			</div>
 		</div>
-	</form>
+	<?= form_close() ?>
 </div>
 </div>
 

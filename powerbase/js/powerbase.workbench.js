@@ -65,25 +65,30 @@
 		};
 		
 		this.save = function() {
-			var self = this;
-			var data = $('#userData form').serialize();
-			request({
-				url: endPoint + 'users/save/',
-				type: 'POST',
-				data: data,
-				success: function() {
-					self.getList();
-					self.get();
-				}
-			});
-			
+			var userDataForm = "#userDataForm";
+			if ($(userDataForm).smkValidate()) {
+				var self = this;
+				var data = $(userDataForm).serialize();
+				request({
+					url: endPoint + 'users/save/',
+					type: 'POST',
+					data: data,
+					success: function() {
+						self.getList();
+						self.get();
+					}
+				});
+			}
 		};
 		
 		this.delete = function(id) {
 			var self = this;
+			var userDataForm = "#userDataForm";
+			var data = $(userDataForm).serialize();
 			request({
 				url: endPoint + 'users/delete/?id=' + id,
-				type: 'GET',
+				type: 'POST',
+				data: data,
 				success: function() {
 					self.getList();
 					self.get();

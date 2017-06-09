@@ -90,13 +90,13 @@ class PbTable extends PB_Model {
 	
 	public function getResult($select=array(), $where=array(), $orderBy="", $limit=0, $offset=0) {
 		if (is_empty($this->tableName)) throw new PbException("invalid table manipuration.");
-		$result = $this->db->
-			select($select)->
-			from($this->tableName)->
-			where($where)->
-			order_by($orderBy)->
-			limit($limit, $offset)->
-			get();
+		$result = $this->db
+			->select($select)
+			->from($this->tableName)
+			->where($where)
+			->order_by($orderBy)
+			->limit($limit, $offset)
+			->get();
 		return $result;
 	}
 

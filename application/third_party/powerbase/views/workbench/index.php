@@ -12,51 +12,17 @@ echo doctype();
 <link media="all" type="text/css" rel="stylesheet" href="<?php echo base_url("powerbase/css/layout.css"); ?>">
 <link media="all" type="text/css" rel="stylesheet" href="<?php echo base_url("powerbase/css/powerbase.css"); ?>">
 <link media="all" type="text/css" rel="stylesheet" href="<?php echo base_url("powerbase/css/bootstrap.min.css"); ?>">
+<link media="all" type="text/css" rel="stylesheet" href="<?php echo base_url("powerbase/css/smoke.min.css"); ?>">
 <link media="all" type="text/css" rel="stylesheet" href="<?php echo base_url("powerbase/css/datatables.min.css"); ?>">
 <script src="<?php echo base_url("powerbase/js/jquery-2.2.4.min.js"); ?>"></script>
 <script src="<?php echo base_url("powerbase/js/jquery-ui-1.9.2.custom.js"); ?>"></script>
 <script src="<?php echo base_url("powerbase/js/jquery.layout-latest.js"); ?>"></script>
 <script src="<?php echo base_url("powerbase/js/jquery.cookie.js"); ?>"></script>
+<script src="<?php echo base_url("powerbase/js/smoke.min.js"); ?>"></script>
 <script src="<?php echo base_url("powerbase/js/powerbase.js"); ?>"></script>
 <script src="<?php echo base_url("powerbase/js/powerbase.workbench.js"); ?>"></script>
 <script src="<?php echo base_url("powerbase/js/datatables.min.js"); ?>"></script>
 <script src="<?php echo base_url("powerbase/js/dataTables.colResize.js"); ?>"></script>
-<style type="text/css">
-</style>
-<script type="text/javascript">
-	var endPoint = '<?php echo base_url(); ?>' + 'workbench/';
-	var workbench;
-	var table = 0;
-	var toggleUserMenu = function(){
-		var width = $("#user-disp-area").width();
-		if (width < 100) width = 100;
-		var $user_operation = $('#user-operation');
-		$user_operation.css('width', width+50);
-		if ($user_operation.css('visibility') === "hidden") {
-			$user_operation.css('visibility', 'visible');
-		} else {
-			$user_operation.css('visibility', 'hidden');
-		}
-	};
-	$(window).click(function(e){
-		if ($(e.target).attr("id") === 'user-disp-area') return;
-		$('#user-operation').css('visibility', 'hidden');
-	});
-	$(document).ready(function(){
-		workbench = new Workbench();
-		workbench.layout();
-		workbench.paneling('menu-database');
-		$("#menu-database").addClass("side-menu-on");
-		$('.side-menu').on('click', function() {
-			$(".side-menu").each(function() {
-				$(this).removeClass("side-menu-on");
-			});
-			$(this).addClass("side-menu-on");
-			workbench.paneling($(this).attr('id'));
-		});
-	});
-
-</script>
 </head>
 
 <body id="workbench">
@@ -158,7 +124,40 @@ echo doctype();
 		<!--  		</div>-->
 	</div>
 </div>
+<script type="text/javascript">
+	var endPoint = '<?php echo base_url(); ?>' + 'workbench/';
+	var workbench;
+	var table = 0;
+	var toggleUserMenu = function(){
+		var width = $("#user-disp-area").width();
+		if (width < 100) width = 100;
+		var $user_operation = $('#user-operation');
+		$user_operation.css('width', width+50);
+		if ($user_operation.css('visibility') === "hidden") {
+			$user_operation.css('visibility', 'visible');
+		} else {
+			$user_operation.css('visibility', 'hidden');
+		}
+	};
+	$(window).click(function(e){
+		if ($(e.target).attr("id") === 'user-disp-area') return;
+		$('#user-operation').css('visibility', 'hidden');
+	});
+	$(document).ready(function(){
+		workbench = new Workbench();
+		workbench.layout();
+		workbench.paneling('menu-database');
+		$("#menu-database").addClass("side-menu-on");
+		$('.side-menu').on('click', function() {
+			$(".side-menu").each(function() {
+				$(this).removeClass("side-menu-on");
+			});
+			$(this).addClass("side-menu-on");
+			workbench.paneling($(this).attr('id'));
+		});
+	});
 
+</script>
 </body>
 </html>
  
