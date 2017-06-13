@@ -13,6 +13,11 @@ $text = array(
 	"is_required"=>"%1 is required.",
 	"db_connection_failed"=>"Could not connect to the database.",
 	"weak_password"=>"Password needs at least 6 characters.",
+	"overflow"=>"Overflow.",
+	"not_integer"=>"Specified value is not Integer.",
+	"not_float"=>"Specified value is not Float.",
+	"invalid_type"=>"Invalid type.",
+	"duplicate_value"=>"Specified value is already exixts.",
 	
 	// Initialization
 	"welcome_to_the_peabee" => "Welcome to the %1.",

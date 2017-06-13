@@ -8,12 +8,18 @@ class PbUsersModel extends PbTable {
 		parent::__construct(PbUsersModel::TABLE_NAME);
 	}
 	
+	public function check(array $data, PbErrors $errors=null) {
+		$errors = parent::check($data, $errors);
+		
+		
+		return $errors;
+	}
+	
 	public function save(array $data, $id=null) {
 		if (isset($data["password"])) {
 			if ($data["password"] == "") unset($data["password"]);
 			else $data["password"] = PbPassword::hash($data["password"]);
-		} 
-		if (($error = $this->check($data)) !== true) return $error;   
+		}
 		return parent::save($data, $id);
 	}
 	

@@ -20,10 +20,12 @@
 					$('#outer-user-list').html(html);
 					$(userList).DataTable({
 						paging: false,
+						info: false,
+						order: [],
 						colReorder: true,
 						dom: 'Zlfrtip',
 						"colResize": {
-							"resizeCallback": function(column) {
+							"resizeCallback": function() {
 								var width = [];
 								$(userList + ' th').each(function(idx , elm) {
 									width.push($(elm).width());
@@ -73,9 +75,14 @@
 					url: endPoint + 'users/save/',
 					type: 'POST',
 					data: data,
-					success: function() {
-						self.getList();
-						self.get();
+					success: function(error) {
+						if (error) {
+							workbench.indicateError(userDataForm, error);
+						} else {
+							self.getList();
+							self.get();
+							flashMessage("success", "Saved");
+						}
 					}
 				});
 			}
@@ -84,16 +91,37 @@
 		this.delete = function(id) {
 			var self = this;
 			var userDataForm = "#userDataForm";
-			var data = $(userDataForm).serialize();
-			request({
-				url: endPoint + 'users/delete/?id=' + id,
-				type: 'POST',
-				data: data,
-				success: function() {
-					self.getList();
-					self.get();
+			$.confirm({
+				icon: 'glyphicon glyphicon-exclamation-sign',
+				title: 'The user will be deleted.',
+				content: 'Are you sure?',
+				closeIcon: true,
+				escapeKey: 'No',
+				buttons: {
+					Yes: {
+						btnClass: 'btn-red',
+						action: function () {
+							var data = $(userDataForm).serialize();
+							request({
+								url: endPoint + 'users/delete/?id=' + id,
+								type: 'POST',
+								data: data,
+								success: function() {
+									self.getList();
+									self.get();
+									flashMessage("success", "Deleted");
+								}
+							});
+						}
+					},
+					No: {
+						btnClass: 'btn-default',
+						keys: ['enter', 'n'],
+						action: function () {}
+					}					
 				}
-			});
+			});			
+			
 			
 		};
 	};
@@ -190,6 +218,17 @@
 			var $C = $(containerSelector);
 			if ($C.data("layoutContainer")) $C.layout().destroy();				
 			window[name] = null;
+		},
+		
+		indicateError : function(form, error) {
+			var source = JSON.parse(error);
+			for(var table in source) {
+				for(var item in source[table]) {
+					var selector = form + ' [name="data[' + table + '][' + item + ']"]';
+					var message = source[table][item].join(", ");
+					$.smkAddError(selector, message);
+				}
+			}
 		}
 		
 	};

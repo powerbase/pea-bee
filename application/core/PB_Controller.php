@@ -55,22 +55,33 @@ class PB_Controller extends CI_Controller {
 	public function getData() {
 		return $this->_data;
 	}
-	
+
+	/**
+	 * Save data.
+	 * @param array $data
+	 * @return bool|PbErrors
+	 * @throws PbException
+	 */
 	public function save(array $data) {
-		$error = false;
+		$hasError = false;
+		$errors = null;
 		$this->db->trans_begin();
 		foreach($data as $tblName=>$items) {
 			$model = PbTable::newInstance($tblName);
-			$error = $model->check($data);
-			if ($error !== true) break;
+			$errors = $model->check($data);
+			if ($errors->hasError()) {
+				$hasError = true;
+				break;
+			}
 			$model->save($data);
 		}
-		if ($error === false) {
+		if (!$hasError) {
 			$this->db->trans_commit();
 			return true;
 		}
 		$this->db->trans_rollback();
-		return $error;
+		if (!$errors instanceof PbErrors) throw new PbException("invalid type of returns.");
+		return $errors;
 	}
 
 	public function redirect($url) {

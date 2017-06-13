@@ -20,7 +20,7 @@ class PbWorkbenchController extends PB_Controller {
 		switch($func) {
 			case "get_users_as_html":
 				$model = new PbUsersModel();
-				$users = $model->get();
+				$users = $model->get(array(), array(), "id");
 				$this->set("users", $users);
 				echo $this->render("workbench/parts/user_list", true);
 				break;
@@ -38,10 +38,13 @@ class PbWorkbenchController extends PB_Controller {
 			case "save":
 				$data = $this->input->post("data");
 				$model = new PbUsersModel();
-				$res = $model->save($data["pb_users"]);
-				if (is_array($res)) {
-					
+				$errors = $model->check($data["pb_users"]);
+				if ($errors->hasError()) {
+					$error = array("pb_users" => array("user_name"=>array("overflow",)));
+					echo json_encode($error);
+					exit;
 				}
+				$model->save($data["pb_users"]);
 				break;
 				
 			case "delete":

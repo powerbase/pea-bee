@@ -7,9 +7,7 @@ function pr(obj) {
 }
 
 function array_key_exists(key, search) {
-	if (!search || (search.constructor !== Array && search.constructor !== Object)) {
-		return false;
-	}
+	if (!search || (search.constructor !== Array && search.constructor !== Object)) return false;
 	return key in search;
 }
 
@@ -31,7 +29,25 @@ function request(p) {
 	$.ajax(p);
 }
 
+function smkIndicateError(input, label, message) {
+	$(input).css("border-color", '#a94442');
+	$(label).css("color", '#a94442');
+	$(input).after("<span style='color: #a94442; display: block; position: absolute; right: 15px; font-size: 12px; margin-top: 0; margin-bottom: 0;'>"+message+"</span>");
+}
+
+var flash_message = "#flash-message";
 var shadow_overlay = "#shadow-overlay";
+
+var flashMessage = function(level, message) {
+	var blink = true;
+	$("#progresss-animation").hide();
+	$(flash_message).addClass('alert-' + level);
+	$(flash_message).html(message);
+	$(flash_message).fadeIn(100, function(){
+		if (blink) for(var i = 0; i < 2; i++) $(flash_message).fadeTo('normal', 0.3).fadeTo('normal', 1.0);
+		$(flash_message).fadeOut(2000);
+	});
+};
 
 function progress(mode) {
 	if (!$(shadow_overlay).get(0)) return;
@@ -45,9 +61,9 @@ function progress(mode) {
 		return d.promise();
 	} else {
 		$(shadow_overlay).hide();
-		$("#progresss-animation").fadeOut("normal");
+		$("#progresss-animation").fadeOut("fast");
 		setTimeout(function(){
-			$("#progresss-animation").fadeOut("normal");
+			$("#progresss-animation").fadeOut("fast");
 			//d.resolve();
 		}, 100);
 		return d.promise();
@@ -80,18 +96,8 @@ window.onload = function(){
 		window.opener.$("shadow_overlay").css('display', 'none');
 	}
 };
-var ua = navigator.userAgent;
-var isIE6 = ua.match(/msie [6.]/i),
-    isIE7 = ua.match(/msie [7.]/i),
-    isIE8 = ua.match(/msie [8.]/i),
-    isIE9 = ua.match(/msie [9.]/i),
-    isIE10 = ua.match(/msie [10.]/i),
-    isChrome = ua.match(/chrome/i),
-    isSafari = ua.match(/safari/i),
-    isfireFox = ua.match(/firefox/i),
-    isOpera = ua.match(/opera/i);
 
-var isIE = false;
-if( ua.match(/MSIE/i) || ua.match(/Trident/i) ) {
-    isIE = true;
-}
+$(document).click(function(e) {
+	if ($(flash_message).get(0)) $(flash_message).css('display', 'none');
+	e.stopPropagation();
+});

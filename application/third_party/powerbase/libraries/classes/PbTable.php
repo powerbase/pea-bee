@@ -114,7 +114,11 @@ class PbTable extends PB_Model {
 
 	public function exists($id) {
 		if (is_empty($this->tableName)) throw new PbException("invalid table manipuration.");
-		$query = $this->db->select($this->pk)->from($this->tableName)->where(array($this->pk => $id))->get();
+		$query = $this->db
+			->select($this->pk)
+			->from($this->tableName)
+			->where(array($this->pk => $id))
+			->get();
 		if ($query->num_rows() == 0) return false;
 		return true;
 	}
@@ -184,9 +188,15 @@ class PbTable extends PB_Model {
 		}
 		return $delId;
 	}
-	
-	public function check(array $data) {
-		$errors = array();
+
+	/**
+	 * Check data.
+	 * @param array $data
+	 * @param PbErrors|null $errors
+	 * @return PbErrors
+	 */
+	public function check(array $data, PbErrors $errors=null) {
+		if ($errors === null) $errors = new PbErrors();
 		foreach($data as $name=>$val) {
 			$fields = $this->fields[$name];
 			$type = $fields["type"];
@@ -199,11 +209,16 @@ class PbTable extends PB_Model {
 				//TODO: implements
 			}
 		}
-		
-		if (count($errors) == 0) return true;
 		return $errors;
 	}
 
+	/**
+	 * Save data.
+	 * @param array $data
+	 * @param null $id
+	 * @return bool
+	 * @throws PbException
+	 */
 	public function save(array $data, $id=null) {
 		if (is_empty($this->tableName)) throw new PbException("invalid table manipuration.");
 		if ($id === null && isset($data[$this->pk])) $id = $data[$this->pk];

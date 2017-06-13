@@ -12,12 +12,14 @@ echo doctype();
 <link media="all" type="text/css" rel="stylesheet" href="<?php echo base_url("powerbase/css/layout.css"); ?>">
 <link media="all" type="text/css" rel="stylesheet" href="<?php echo base_url("powerbase/css/powerbase.css"); ?>">
 <link media="all" type="text/css" rel="stylesheet" href="<?php echo base_url("powerbase/css/bootstrap.min.css"); ?>">
+<link media="all" type="text/css" rel="stylesheet" href="<?php echo base_url("powerbase/css/jquery-confirm.css"); ?>">
 <link media="all" type="text/css" rel="stylesheet" href="<?php echo base_url("powerbase/css/smoke.min.css"); ?>">
 <link media="all" type="text/css" rel="stylesheet" href="<?php echo base_url("powerbase/css/datatables.min.css"); ?>">
 <script src="<?php echo base_url("powerbase/js/jquery-2.2.4.min.js"); ?>"></script>
 <script src="<?php echo base_url("powerbase/js/jquery-ui-1.9.2.custom.js"); ?>"></script>
 <script src="<?php echo base_url("powerbase/js/jquery.layout-latest.js"); ?>"></script>
 <script src="<?php echo base_url("powerbase/js/jquery.cookie.js"); ?>"></script>
+<script src="<?php echo base_url("powerbase/js/jquery-confirm.js"); ?>"></script>
 <script src="<?php echo base_url("powerbase/js/smoke.min.js"); ?>"></script>
 <script src="<?php echo base_url("powerbase/js/powerbase.js"); ?>"></script>
 <script src="<?php echo base_url("powerbase/js/powerbase.workbench.js"); ?>"></script>
@@ -27,18 +29,13 @@ echo doctype();
 
 <body id="workbench">
 <div id="shadow-overlay"></div>
-<div id="user-operation">
-	<ul class="submenu" id="user-navi">
-		<li><a href="<?php echo base_url("workbench/logout"); ?>">Sign Out</a></li>
-	</ul>
-</div>
 <div class="ui-layout-north">
-
 	<header id="header">
 		<div id="header-left">
 			<div id="header-title"><?=$system_name?> workbench</div>
 		</div>
 		<div id="header-center">
+			<div id="flash-message" class="alert"></div>
 			<div id="progresss-animation" style="padding-top:8px; display:none;">
 				<img alt="" src="<?php echo base_url("powerbase/images/progress_g.gif"); //http://www.ajaxload.info/ ?>">
 			</div>
@@ -52,9 +49,13 @@ echo doctype();
 			</a>
 		</div>
 	</header>
-
 </div>
 
+<div id="user-operation">
+	<ul class="submenu" id="user-navi">
+		<li><a href="<?php echo base_url("workbench/logout"); ?>">Sign Out</a></li>
+	</ul>
+</div>
 
 <div class="ui-layout-center split-pane" id="center-container">
 </div>
@@ -139,9 +140,11 @@ echo doctype();
 			$user_operation.css('visibility', 'hidden');
 		}
 	};
-	$(window).click(function(e){
-		if ($(e.target).attr("id") === 'user-disp-area') return;
-		$('#user-operation').css('visibility', 'hidden');
+	$(document).click(function(e) {
+		var $user_operation = $('#user-operation');
+		if ($(e.target).attr('id') === "user-disp-area") return;
+		if ($($user_operation).get(0)) $($user_operation).css('visibility', 'hidden');
+		e.stopPropagation();
 	});
 	$(document).ready(function(){
 		workbench = new Workbench();
@@ -156,7 +159,7 @@ echo doctype();
 			workbench.paneling($(this).attr('id'));
 		});
 	});
-
+	
 </script>
 </body>
 </html>
