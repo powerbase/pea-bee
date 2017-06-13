@@ -1,7 +1,7 @@
 <?php
 $userName = $user_name;
 $userId = $user_id;
-echo doctype();
+echo doctype("html5");
 ?>
 
 <html>
@@ -37,7 +37,7 @@ echo doctype();
 		<div id="header-center">
 			<div id="flash-message" class="alert"></div>
 			<div id="progresss-animation" style="padding-top:8px; display:none;">
-				<img alt="" src="<?php echo base_url("powerbase/images/progress_g.gif"); //http://www.ajaxload.info/ ?>">
+				<img alt="progress" src="<?php echo base_url("powerbase/images/progress_g.gif"); //http://www.ajaxload.info/ ?>">
 			</div>
 		</div>
 		<div id="header-right">
@@ -53,7 +53,7 @@ echo doctype();
 
 <div id="user-operation">
 	<ul class="submenu" id="user-navi">
-		<li><a href="<?php echo base_url("workbench/logout"); ?>">Sign Out</a></li>
+		<li><a id="sign-out" href="javascript:void(0);">Sign Out</a></li>
 	</ul>
 </div>
 
@@ -129,6 +129,20 @@ echo doctype();
 	var endPoint = '<?php echo base_url(); ?>' + 'workbench/';
 	var workbench;
 	var table = 0;
+	var signOut = function(){
+	    window.location = '<?php echo base_url("workbench/logout"); ?>';
+	};
+	$('#sign-out').click(function(e) {
+		if (workbench.isChanged()) {
+			workbench.confirmDiscardChanged(function() {
+				signOut();
+			});
+		} else {
+			signOut();
+		}
+		e.stopPropagation();
+		return false;
+	});
 	var toggleUserMenu = function(){
 		var width = $("#user-disp-area").width();
 		if (width < 100) width = 100;
@@ -152,11 +166,23 @@ echo doctype();
 		workbench.paneling('menu-database');
 		$("#menu-database").addClass("side-menu-on");
 		$('.side-menu').on('click', function() {
-			$(".side-menu").each(function() {
-				$(this).removeClass("side-menu-on");
-			});
-			$(this).addClass("side-menu-on");
-			workbench.paneling($(this).attr('id'));
+		    var id = $(this).attr('id');
+		    var self = $(this);
+		    var func = function() {
+				$(".side-menu").each(function() {
+					$(this).removeClass("side-menu-on");
+				});
+				self.addClass("side-menu-on");
+				workbench.paneling(id);
+				workbench.resetChanged();
+			};
+		    if (workbench.isChanged()) {
+		        workbench.confirmDiscardChanged(function() {
+					func();
+				});
+			} else {
+		        func();
+			}
 		});
 	});
 	

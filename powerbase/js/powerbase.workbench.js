@@ -3,129 +3,9 @@
 		this.body = $('body');
 		this.users = new Users();
 		this.cookieExpireDays = 30;
+		this.changed = [];
 	};
 
-	var Users = function() {
-		this.getList = function() {
-			var self = this;
-			var userList = "#userList";
-			var colWidth = 0;
-			var width = $.cookie("userList.colWidth");
-			if (width) colWidth = width.split(','); 
-			request({
-				url: endPoint + 'users/get_users_as_html/',
-				type: 'GET',
-				dataType : 'html',
-				success: function(html) {
-					$('#outer-user-list').html(html);
-					$(userList).DataTable({
-						paging: false,
-						info: false,
-						order: [],
-						colReorder: true,
-						dom: 'Zlfrtip',
-						"colResize": {
-							"resizeCallback": function() {
-								var width = [];
-								$(userList + ' th').each(function(idx , elm) {
-									width.push($(elm).width());
-								});
-								$.cookie("userList.colWidth", width, { expires: workbench.cookieExpireDays });
-							}
-						}
-					});
-					$('.pb-user-row').on('click', function(){
-						var id = $(this).attr('id').match(/\d/g).join('');
-						self.get(id);
-					});
-					if (colWidth) {
-						$(userList + ' th').each(function(idx , elm) {
-							$(elm).width(colWidth[idx]);
-						});
-					}
-				}
-			});
-		};
-		
-		this.get = function(id) {
-			var self = this;
-			if (!id) id = "";
-			request({
-				url: endPoint + 'users/get_user/?id=' + id,
-				type: 'GET',
-				dataType : 'html',
-				success: function(html) {
-					$('#outer-user-panel').html(html);
-					$('#user-panel-new').on('click', function(){
-						self.get();
-					});
-					$('#user-panel-save').on('click', function(){
-						self.save();
-					});
-				}
-			});
-		};
-		
-		this.save = function() {
-			var userDataForm = "#userDataForm";
-			if ($(userDataForm).smkValidate()) {
-				var self = this;
-				var data = $(userDataForm).serialize();
-				request({
-					url: endPoint + 'users/save/',
-					type: 'POST',
-					data: data,
-					success: function(error) {
-						if (error) {
-							workbench.indicateError(userDataForm, error);
-						} else {
-							self.getList();
-							self.get();
-							flashMessage("success", "Saved");
-						}
-					}
-				});
-			}
-		};
-		
-		this.delete = function(id) {
-			var self = this;
-			var userDataForm = "#userDataForm";
-			$.confirm({
-				icon: 'glyphicon glyphicon-exclamation-sign',
-				title: 'The user will be deleted.',
-				content: 'Are you sure?',
-				closeIcon: true,
-				escapeKey: 'No',
-				buttons: {
-					Yes: {
-						btnClass: 'btn-red',
-						action: function () {
-							var data = $(userDataForm).serialize();
-							request({
-								url: endPoint + 'users/delete/?id=' + id,
-								type: 'POST',
-								data: data,
-								success: function() {
-									self.getList();
-									self.get();
-									flashMessage("success", "Deleted");
-								}
-							});
-						}
-					},
-					No: {
-						btnClass: 'btn-default',
-						keys: ['enter', 'n'],
-						action: function () {}
-					}					
-				}
-			});			
-			
-			
-		};
-	};
-	
 	Workbench.prototype = {
 		paneling : function(id) {
 			this.destroyLayout('#center-container');
@@ -185,7 +65,7 @@
 		},
 
 		createLayout : function(containerSelector) {
-			var name = 'innerLayout';
+			var name = (containerSelector === 'body' ? 'outerLayout' : 'innerLayout');
 			var $C = $(containerSelector);
 			if (!$C.data("layoutContainer")) {
 				window[name] = $C.layout({
@@ -214,10 +94,71 @@
 		},
 		
 		destroyLayout : function(containerSelector) {
-			var name = 'innerLayout';
+			var name = (containerSelector==='body' ? 'outerLayout' : 'innerLayout');
 			var $C = $(containerSelector);
 			if ($C.data("layoutContainer")) $C.layout().destroy();				
 			window[name] = null;
+		},
+		
+		setChanged : function(form, value) {
+			this.changed[form] = value;
+		},
+
+		resetChanged : function() {
+			this.changed = [];
+		},
+
+		isChanged : function(form) {
+			if (form) {
+				if (!this.changed[form]) return false;
+				return this.changed[form];
+			}
+			for(var f in this.changed) {
+				if (this.changed[f]) return true;
+			}
+			return false;
+		},
+		
+		confirmDiscardChanged : function(func) {
+			$.confirm({
+				icon: 'glyphicon glyphicon-exclamation-sign',
+				title: 'Data has been changed.',
+				content: 'Discard the changes?',
+				closeIcon: true,
+				escapeKey: 'No',
+				buttons: {
+					Yes: {
+						btnClass: 'btn-red',
+						action: function () {
+							func();
+						}
+					},
+					No: {
+						btnClass: 'btn-default',
+						keys: ['enter', 'n'],
+						action: function () {}
+					}
+				}
+			});
+		},
+
+		listenUpdate : function(form) {
+			var self = this;
+			var listener = function(obj) {
+				obj.change(function(){
+					obj.parent().parent().addClass("has-warning");
+					self.setChanged(form, true);
+				});
+				obj.keypress(function(e){
+					if (e.keyCode === 13 || e.keyCode === 9) return; 
+					if (obj.is(':disabled') || obj.attr("readonly") === "readonly") return; 
+					obj.parent().parent().addClass("has-warning");
+					self.setChanged(form, true);
+				});
+			};
+			$(form + ' input')   .each(function(){ listener($(this)); });
+			$(form + ' select')  .each(function(){ listener($(this)); });
+			$(form + ' textarea').each(function(){ listener($(this)); });
 		},
 		
 		indicateError : function(form, error) {
@@ -230,8 +171,135 @@
 				}
 			}
 		}
-		
 	};
+
+	var Users = function() {
+		this.userDataForm = "#userDataForm";
+		
+		this.getList = function() {
+			var self = this;
+			var userList = "#userList";
+			var colWidth = 0;
+			var width = $.cookie("userList.colWidth");
+			if (width) colWidth = width.split(',');
+			request({
+				url: endPoint + 'users/get_users_as_html/',
+				type: 'GET',
+				dataType : 'html',
+				success: function(html) {
+					$('#outer-user-list').html(html);
+					$(userList).DataTable({
+						paging: false,
+						info: false,
+						order: [],
+						colReorder: true,
+						dom: 'Zlfrtip',
+						"colResize": {
+							"resizeCallback": function() {
+								var width = [];
+								$(userList + ' th').each(function(idx , elm) {
+									width.push($(elm).width());
+								});
+								$.cookie("userList.colWidth", width, { expires: workbench.cookieExpireDays });
+							}
+						}
+					});
+					$('.pb-user-row').on('click', function(){
+						var id = $(this).attr('id').match(/\d/g).join('');
+						if (workbench.isChanged(self.userDataForm)) {
+							workbench.confirmDiscardChanged(function(){
+								self.get(id);
+							});
+						} else {
+							self.get(id);
+						}
+					});
+					if (colWidth) {
+						$(userList + ' th').each(function(idx , elm) {
+							$(elm).width(colWidth[idx]);
+						});
+					}
+				}
+			});
+		};
+
+		this.get = function(id) {
+			var self = this;
+			if (!id) id = "";
+			request({
+				url: endPoint + 'users/get_user/?id=' + id,
+				type: 'GET',
+				dataType : 'html',
+				success: function(html) {
+					$('#outer-user-panel').html(html);
+					workbench.listenUpdate(self.userDataForm);
+					workbench.setChanged(self.userDataForm, false);
+					$('#user-panel-new').on('click', function(){
+						self.get();
+					});
+					$('#user-panel-save').on('click', function(){
+						self.save();
+					});
+				}
+			});
+		};
+
+		this.save = function() {
+			if ($(this.userDataForm).smkValidate()) {
+				var self = this;
+				var data = $(this.userDataForm).serialize();
+				request({
+					url: endPoint + 'users/save/',
+					type: 'POST',
+					data: data,
+					success: function(error) {
+						if (error) {
+							workbench.indicateError(self.userDataForm, error);
+						} else {
+							self.getList();
+							self.get();
+							flashMessage("success", "Saved");
+						}
+					}
+				});
+			}
+		};
+
+		this.delete = function(id) {
+			var self = this;
+			$.confirm({
+				icon: 'glyphicon glyphicon-exclamation-sign',
+				title: 'The user will be deleted.',
+				content: 'Are you sure?',
+				closeIcon: true,
+				escapeKey: 'No',
+				buttons: {
+					Yes: {
+						btnClass: 'btn-red',
+						action: function () {
+							var data = $(self.userDataForm).serialize();
+							request({
+								url: endPoint + 'users/delete/?id=' + id,
+								type: 'POST',
+								data: data,
+								success: function() {
+									self.getList();
+									self.get();
+									flashMessage("success", "Deleted");
+								}
+							});
+						}
+					},
+					No: {
+						btnClass: 'btn-default',
+						keys: ['enter', 'n'],
+						action: function () {}
+					}
+				}
+			});
+		};
+	};
+
 	window.Workbench = Workbench;
 })();
 
