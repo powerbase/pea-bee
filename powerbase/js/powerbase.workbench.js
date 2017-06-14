@@ -1,7 +1,9 @@
 (function() {
-	var Workbench = function() {
+	"use strict";
+	var Workbench = function(endPoint) {
+		this.endPoint = endPoint;
 		this.body = $('body');
-		this.users = new Users();
+		this.users = new Users(this);
 		this.cookieExpireDays = 30;
 		this.changed = [];
 	};
@@ -119,27 +121,31 @@
 			return false;
 		},
 		
-		confirmDiscardChanged : function(func) {
-			$.confirm({
-				icon: 'glyphicon glyphicon-exclamation-sign',
-				title: 'Data has been changed.',
-				content: 'Discard the changes?',
-				closeIcon: true,
-				escapeKey: 'No',
-				buttons: {
-					Yes: {
-						btnClass: 'btn-red',
-						action: function () {
-							func();
+		confirmDiscardChanges : function(func, form) {
+			if (this.isChanged(form)) {
+				$.confirm({
+					icon: 'glyphicon glyphicon-exclamation-sign',
+					title: 'Data has been changed.',
+					content: 'Discard the changes?',
+					closeIcon: true,
+					escapeKey: 'No',
+					buttons: {
+						Yes: {
+							btnClass: 'btn-red',
+							action: function () {
+								func();
+							}
+						},
+						No: {
+							btnClass: 'btn-default',
+							keys: ['enter', 'n'],
+							action: function () {}
 						}
-					},
-					No: {
-						btnClass: 'btn-default',
-						keys: ['enter', 'n'],
-						action: function () {}
 					}
-				}
-			});
+				});
+			 } else {
+			 	func();
+			 }
 		},
 
 		listenUpdate : function(form) {
@@ -164,7 +170,9 @@
 		indicateError : function(form, error) {
 			var source = JSON.parse(error);
 			for(var table in source) {
+				if (!source.hasOwnProperty(table)) continue;
 				for(var item in source[table]) {
+					if (!source[table].hasOwnProperty(item)) continue;
 					var selector = form + ' [name="data[' + table + '][' + item + ']"]';
 					var message = source[table][item].join(", ");
 					$.smkAddError(selector, message);
@@ -173,7 +181,8 @@
 		}
 	};
 
-	var Users = function() {
+	var Users = function(workbench) {
+		this.workbench = workbench;
 		this.userDataForm = "#userDataForm";
 		
 		this.getList = function() {
@@ -183,7 +192,7 @@
 			var width = $.cookie("userList.colWidth");
 			if (width) colWidth = width.split(',');
 			request({
-				url: endPoint + 'users/get_users_as_html/',
+				url: this.workbench.endPoint + 'users/get_users_as_html/',
 				type: 'GET',
 				dataType : 'html',
 				success: function(html) {
@@ -200,19 +209,14 @@
 								$(userList + ' th').each(function(idx , elm) {
 									width.push($(elm).width());
 								});
-								$.cookie("userList.colWidth", width, { expires: workbench.cookieExpireDays });
+								$.cookie("userList.colWidth", width, { expires: self.workbench.cookieExpireDays });
 							}
 						}
 					});
-					$('.pb-user-row').on('click', function(){
+					$('.pb-user-row').on('click', function(e){
 						var id = $(this).attr('id').match(/\d/g).join('');
-						if (workbench.isChanged(self.userDataForm)) {
-							workbench.confirmDiscardChanged(function(){
-								self.get(id);
-							});
-						} else {
-							self.get(id);
-						}
+						self.workbench.confirmDiscardChanges(self.get.bind(self, id), self.userDataForm);
+						e.stopPropagation();
 					});
 					if (colWidth) {
 						$(userList + ' th').each(function(idx , elm) {
@@ -227,18 +231,20 @@
 			var self = this;
 			if (!id) id = "";
 			request({
-				url: endPoint + 'users/get_user/?id=' + id,
+				url: this.workbench.endPoint + 'users/get_user/?id=' + id,
 				type: 'GET',
 				dataType : 'html',
 				success: function(html) {
 					$('#outer-user-panel').html(html);
-					workbench.listenUpdate(self.userDataForm);
-					workbench.setChanged(self.userDataForm, false);
-					$('#user-panel-new').on('click', function(){
-						self.get();
+					self.workbench.listenUpdate(self.userDataForm);
+					self.workbench.setChanged(self.userDataForm, false);
+					$('#user-panel-new').on('click', function(e){
+						self.workbench.confirmDiscardChanges(self.get.bind(self), self.userDataForm);
+						e.stopPropagation();
 					});
-					$('#user-panel-save').on('click', function(){
+					$('#user-panel-save').on('click', function(e){
 						self.save();
+						e.stopPropagation();
 					});
 				}
 			});
@@ -249,12 +255,12 @@
 				var self = this;
 				var data = $(this.userDataForm).serialize();
 				request({
-					url: endPoint + 'users/save/',
+					url: this.workbench.endPoint + 'users/save/',
 					type: 'POST',
 					data: data,
 					success: function(error) {
 						if (error) {
-							workbench.indicateError(self.userDataForm, error);
+							self.workbench.indicateError(self.userDataForm, error);
 						} else {
 							self.getList();
 							self.get();
@@ -279,7 +285,7 @@
 						action: function () {
 							var data = $(self.userDataForm).serialize();
 							request({
-								url: endPoint + 'users/delete/?id=' + id,
+								url: self.workbench.endPoint + 'users/delete/?id=' + id,
 								type: 'POST',
 								data: data,
 								success: function() {

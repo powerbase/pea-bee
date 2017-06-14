@@ -29,12 +29,6 @@ function request(p) {
 	$.ajax(p);
 }
 
-function smkIndicateError(input, label, message) {
-	$(input).css("border-color", '#a94442');
-	$(label).css("color", '#a94442');
-	$(input).after("<span style='color: #a94442; display: block; position: absolute; right: 15px; font-size: 12px; margin-top: 0; margin-bottom: 0;'>"+message+"</span>");
-}
-
 var flash_message = "#flash-message";
 var shadow_overlay = "#shadow-overlay";
 
@@ -101,3 +95,11 @@ $(document).click(function(e) {
 	if ($(flash_message).get(0)) $(flash_message).css('display', 'none');
 	e.stopPropagation();
 });
+
+(function($) {
+	$.fn.vToggle = function() {
+		return this.css('visibility', function(idx, visible) {	// idx : index of elements.
+			return (visible === 'visible') ? 'hidden' : 'visible';
+		});
+	};
+})(jQuery);

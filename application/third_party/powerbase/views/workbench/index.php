@@ -128,18 +128,11 @@ echo doctype("html5");
 <script type="text/javascript">
 	var endPoint = '<?php echo base_url(); ?>' + 'workbench/';
 	var workbench;
-	var table = 0;
 	var signOut = function(){
 	    window.location = '<?php echo base_url("workbench/logout"); ?>';
 	};
 	$('#sign-out').click(function(e) {
-		if (workbench.isChanged()) {
-			workbench.confirmDiscardChanged(function() {
-				signOut();
-			});
-		} else {
-			signOut();
-		}
+		workbench.confirmDiscardChanges(signOut);
 		e.stopPropagation();
 		return false;
 	});
@@ -148,11 +141,7 @@ echo doctype("html5");
 		if (width < 100) width = 100;
 		var $user_operation = $('#user-operation');
 		$user_operation.css('width', width+50);
-		if ($user_operation.css('visibility') === "hidden") {
-			$user_operation.css('visibility', 'visible');
-		} else {
-			$user_operation.css('visibility', 'hidden');
-		}
+		$user_operation.vToggle();
 	};
 	$(document).click(function(e) {
 		var $user_operation = $('#user-operation');
@@ -161,11 +150,11 @@ echo doctype("html5");
 		e.stopPropagation();
 	});
 	$(document).ready(function(){
-		workbench = new Workbench();
+		workbench = new Workbench(endPoint);
 		workbench.layout();
 		workbench.paneling('menu-database');
 		$("#menu-database").addClass("side-menu-on");
-		$('.side-menu').on('click', function() {
+		$('.side-menu').on('click', function(e) {
 		    var id = $(this).attr('id');
 		    var self = $(this);
 		    var func = function() {
@@ -176,16 +165,10 @@ echo doctype("html5");
 				workbench.paneling(id);
 				workbench.resetChanged();
 			};
-		    if (workbench.isChanged()) {
-		        workbench.confirmDiscardChanged(function() {
-					func();
-				});
-			} else {
-		        func();
-			}
+			workbench.confirmDiscardChanges(func);
+			e.stopPropagation();
 		});
 	});
-	
 </script>
 </body>
 </html>
