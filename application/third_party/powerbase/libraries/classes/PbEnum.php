@@ -13,7 +13,7 @@ abstract class PbEnum {
 		$ref = new ReflectionObject($this);
 		$consts = $ref->getConstants();
 		if (!in_array($value, $consts, true)) {
-			throw new InvalidArgumentException;
+			throw new PbException("Invalid argument.");
 		}
 		$this->scalar = $value;
 	}

@@ -18,7 +18,7 @@ class PbSettingsDb {
 		if ($this->initialState()) $this->query("CREATE TABLE settings (key text primary key, value text)");
 	}
 	
-	public function initialize(array $settings) {
+	public function check(array $settings) {
 		$errors = array();
 		if (is_empty($settings["system_name"])) {
 			$errors[] = PbTextPerLang::get("is_required", PbTextPerLang::get("system_name"));
@@ -40,6 +40,11 @@ class PbSettingsDb {
 				$errors[] = PbTextPerLang::get("db_connection_failed");
 			}
 		}
+		return $errors;
+	}
+	
+	public function initialize(array $settings) {
+		$errors = $this->check($settings);
 		if (count($errors) != 0) return $errors;
 		
 		self::set(PbSettings::SYSTEM_NAME, $settings["system_name"]);

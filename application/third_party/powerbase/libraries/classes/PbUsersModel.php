@@ -10,6 +10,21 @@ class PbUsersModel extends PbTable {
 	
 	public function check(array $data, PbErrors $errors=null) {
 		$errors = parent::check($data, $errors);
+
+		if (isset($data["password"]) && $data["password"] == "") unset($data["password"]);
+		
+		if (is_empty($data["user_id"])) {
+			$errors->push(PbMessages::value(PbMessages::REQUIRED), PbUsersModel::TABLE_NAME, "user_id");
+		}
+		if (isset($data["password"])) {
+			if (is_empty($data["password"])) {
+				$errors->push(PbMessages::value(PbMessages::REQUIRED), PbUsersModel::TABLE_NAME, "password");
+			}
+		}
+		
+		
+		
+		
 		
 		
 		return $errors;
@@ -17,8 +32,7 @@ class PbUsersModel extends PbTable {
 	
 	public function save(array $data, $id=null) {
 		if (isset($data["password"])) {
-			if ($data["password"] == "") unset($data["password"]);
-			else $data["password"] = PbPassword::hash($data["password"]);
+			$data["password"] = PbPassword::hash($data["password"]);
 		}
 		return parent::save($data, $id);
 	}

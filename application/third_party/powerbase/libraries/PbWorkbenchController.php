@@ -40,7 +40,7 @@ class PbWorkbenchController extends PB_Controller {
 				$model = new PbUsersModel();
 				$errors = $model->check($data["pb_users"]);
 				if ($errors->hasError()) {
-					$error = array("pb_users" => array("user_name"=>array("overflow",)));
+					$error = $errors->getMessages();
 					echo json_encode($error);
 					exit;
 				}

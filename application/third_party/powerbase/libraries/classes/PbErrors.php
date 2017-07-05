@@ -19,10 +19,18 @@ class PbErrors {
 		return $this->errors;
 	}
 	
-	public function getMessages() {
+	public function getMessages($plain=false) {
 		$messages = array();
 		/** @var PbError $error */
-		foreach($this->errors as $error) $messages[] = $error->getMessage();
+		if ($plain) {
+			foreach($this->errors as $error) {
+				$messages[] = $error->getMessage();
+				return $messages;
+			}
+		}
+		foreach($this->errors as $error) {
+			$messages[$error->getTable()][$error->getItem()][] = $error->getMessage();
+		}
 		return $messages;
 	}
 }

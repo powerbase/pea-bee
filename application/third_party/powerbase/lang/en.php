@@ -14,6 +14,7 @@ $text = array(
 	"db_connection_failed"=>"Could not connect to the database.",
 	"weak_password"=>"Password needs at least 6 characters.",
 	"overflow"=>"Overflow.",
+	"required_field"=>"Required field.",
 	"not_integer"=>"Specified value is not Integer.",
 	"not_float"=>"Specified value is not Float.",
 	"invalid_type"=>"Invalid type.",

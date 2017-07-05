@@ -203,10 +203,21 @@ class PbTable extends PB_Model {
 			$max_length = $fields["max_length"];
 			if ($type == self::DB_FIELD_TYPE_STRING) {
 				if (!empty($max_length)) {
-					//TODO: implements
+					if (mb_strlen($val) > $max_length) {
+						$errors->push(PbMessages::value(PbMessages::OVERFLOW), $this->tableName, $name);
+					}
 				}
 			} else {
-				//TODO: implements
+				if ($type == self::DB_FIELD_TYPE_INTEGER) {
+					if (!preg_match('/^0$|^-?[1-9][0-9]*$/', $val)) {
+						$errors->push(PbMessages::value(PbMessages::NOT_INTEGER), $this->tableName, $name);
+					} 
+				}
+				if ($type == self::DB_FIELD_TYPE_REAL) {
+					if (!preg_match('/^-?[0-9]+(\.[0-9]*)?$/', $val)) {
+						$errors->push(PbMessages::value(PbMessages::NOT_FLOAT), $this->tableName, $name);
+					}
+				}
 			}
 		}
 		return $errors;
